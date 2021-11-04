@@ -2,14 +2,17 @@
   <div class="menu">
     <div class="toolbar">
       <div class="toolbar__header">
-        <h3 v-show="!isUserOpenned">Информация</h3>
-
-        <div v-show="isUserOpenned" class="action">
-          <div class="arrow" @click="closeProfile"></div>
-        </div>
-        <h3 v-show="isUserOpenned">Профиль</h3>
+        <h3>Информация</h3>
       </div>
-      <div class="toolbar__actions"></div>
+      <div class="toolbar__actions">
+        <Icon
+          v-show="isUserOpenned"
+          class="action"
+          name="close"
+          :size="45"
+          @click.native="closeProfile"
+        />
+      </div>
     </div>
     <div class="content">
       <div v-show="!isUserOpenned" class="legend">
@@ -21,7 +24,7 @@
                 :key="index"
                 :color="item.color"
                 :text="item.text"
-                :counter="item.counter"
+                :counter="tablesCountByGroup[item.group_id]"
                 class="legend__item"
               />
             </draggable>
@@ -42,10 +45,12 @@
 </template>
 
 <script>
+import Icon from "./Icon.vue";
 import LegendItem from "./SideMenu/LegendItem.vue";
 import PersonCard from "./SideMenu/PersonCard.vue";
 import draggable from "vuedraggable";
 import { Doughnut } from "vue-chartjs";
+import { DEFAULT_VALUES } from "../constants/consts";
 
 export default {
   props: {
@@ -59,15 +64,15 @@ export default {
     },
     tables: {
       type: Array,
-      default: () => [],
+      default: DEFAULT_VALUES.ARRAY,
     },
     people: {
       type: Array,
-      default: () => [],
+      default: DEFAULT_VALUES.ARRAY,
     },
     legend: {
       type: Array,
-      default: () => [],
+      default: DEFAULT_VALUES.ARRAY,
     },
   },
   components: {
@@ -75,6 +80,7 @@ export default {
     PersonCard,
     draggable,
     Doughnut,
+    Icon,
   },
   computed: {
     legendItem() {
@@ -92,6 +98,15 @@ export default {
 
       return legendItem || null;
     },
+    tablesCountByGroup() {
+      return this.tables.reduce(
+        (map, table) => ({
+          ...map,
+          [table.group_id]: (+map[table.group_id] || 0) + 1,
+        }),
+        {}
+      );
+    },
   },
   mounted() {
     this.makeChart();
@@ -107,7 +122,9 @@ export default {
           {
             label: "Легенда",
             backgroundColor: this.legend.map((legendItem) => legendItem.color),
-            data: this.legend.map((legendItem) => legendItem.counter),
+            data: this.legend.map(
+              (legendItem) => this.tablesCountByGroup[legendItem.group_id]
+            ),
           },
         ],
       };
@@ -125,7 +142,7 @@ export default {
 <style scoped>
 .menu {
   border-left: 1px solid #ccd8e4;
-  padding: 24px;
+  padding: 35px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -133,8 +150,8 @@ export default {
 
 .toolbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  margin-bottom: 12px;
 }
 
 .toolbar .toolbar__actions button {
@@ -145,27 +162,16 @@ export default {
 }
 
 .toolbar__header {
+  flex: 1 0;
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
+  font-size: 20px;
 }
 
-.toolbar__header .action {
+.toolbar__actions .action {
   cursor: pointer;
-  margin-right: 14px;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.toolbar__header .action .arrow {
-  width: 10px;
-  height: 10px;
-  border-top: 2px solid blue;
-  border-right: 2px solid blue;
-  transform: rotate(-135deg);
+  width: 35px;
+  height: 35px;
 }
 
 h3 {
@@ -193,6 +199,12 @@ h3 {
   width: 100%;
 }
 
+.content .legend .legend__chart {
+  max-width: 300px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
 .content .legend .legend__items .legend__item:not(:first-child) {
   margin-top: 16px;
 }
@@ -212,6 +224,6 @@ h3 {
 }
 
 .profile {
-  padding-top: 20px;
+  padding-top: 40px;
 }
 </style>

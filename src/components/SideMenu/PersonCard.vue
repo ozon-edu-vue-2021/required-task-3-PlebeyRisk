@@ -1,54 +1,68 @@
 <template>
-  <div class="person">
+  <div class="person" :style="cssVars">
     <div class="person__photo">
       <img :src="data.picture" alt="photo" />
+      <MyButton
+        class="button"
+        iconName="home"
+        color="white"
+        bgColor="#666666"
+        :iconSize="35"
+      />
     </div>
     <div class="person__info">
-      <div class="data-name">
-        <b>{{ data.name }} ({{ data.age }})</b>
+      <div class="person__info-name">
+        {{ data.name }}
       </div>
 
-      <div
-        v-if="legend"
-        class="person__info-legend"
-        :style="{ color: legendColor }"
-      >
+      <div v-if="legend" class="person__info-legend">
         {{ legend.text }}
       </div>
-
-      <div class="person__info-email">Почта: {{ data.email }}</div>
-      <div class="person__info-registration-date">
-        Дата регистрации: {{ formatedDate }}
-      </div>
-      <div class="person__info-about">О себе: {{ data.about }}</div>
+    </div>
+    <div class="person__actions">
+      <MyButton iconName="email" />
+      <MyButton iconName="link" width="auto">К3</MyButton>
     </div>
   </div>
 </template>
 
 <script>
 import { format, parseISO } from "date-fns";
+import MyButton from "../MyButton.vue";
+import { COLORS } from "../../constants/consts";
+import { DEFAULT_VALUES } from "../../constants/consts";
 
 export default {
+  name: "PersonCard",
+  components: {
+    MyButton,
+  },
   props: {
     person: {
       type: Object,
-      default: () => ({}),
+      default: DEFAULT_VALUES.OBJECT,
     },
     legend: {
       type: Object,
-      default: () => ({}),
+      default: DEFAULT_VALUES.OBJECT,
     },
   },
   computed: {
     data() {
       return this.person || {};
     },
-    legendColor() {
-      return this.legend?.color || "#000";
-    },
     formatedDate() {
       if (!this.data?.registered) return "";
       return format(parseISO(this.data.registered), "dd/MM/yyyy");
+    },
+    cssVars() {
+      return Object.entries(COLORS).reduce(
+        (map, [key, value]) => ({
+          ...map,
+          [`--${key}`]: value,
+        }),
+        {}
+      );
     },
   },
 };
@@ -56,23 +70,60 @@ export default {
 
 <style scoped>
 .person {
-  display: grid;
-  grid-template-columns: 50px 1fr;
-  grid-gap: 8px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-height: 150px;
+  padding-left: 170px;
+  padding-bottom: 5px;
+}
+
+.person__photo {
+  grid-row-start: 1;
+  grid-row-end: 2;
+}
+
+.person__photo .button {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+}
+
+.person__photo {
+  height: 150px;
+  width: 150px;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .person__photo img {
-  height: 50px;
-  width: 50px;
-  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .person__info {
-  display: grid;
-  grid-gap: 8px;
+  flex: 1 0;
+  z-index: 2;
+}
+
+.person__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 2;
+}
+
+.person__info-legend {
+  font-size: 16px;
+  color: #969696;
 }
 
 .person__info-name {
+  color: var(--PRIMARY);
+  font-weight: 600;
+  font-size: 20px;
   margin-bottom: 10px;
 }
 </style>

@@ -3,7 +3,7 @@
     <h3>Карта офиса</h3>
 
     <div v-if="!isLoading" class="map-root">
-      <MapSVG ref="svg" />
+      <MapSVG ref="map" />
 
       <TableSVG
         v-show="false"
@@ -20,6 +20,7 @@ import MapSVG from "@/assets/images/map.svg";
 import TableSVG from "@/assets/images/workPlace.svg";
 import * as d3 from "d3";
 import ClickOutside from "vue-click-outside";
+import { DEFAULT_VALUES } from "../constants/consts";
 
 export default {
   components: {
@@ -36,22 +37,22 @@ export default {
     },
     tables: {
       type: Array,
-      default: () => [],
+      default: DEFAULT_VALUES.ARRAY,
     },
     people: {
       type: Array,
-      default: () => [],
+      default: DEFAULT_VALUES.ARRAY,
     },
     legend: {
       type: Array,
-      default: () => [],
+      default: DEFAULT_VALUES.ARRAY,
     },
   },
   data() {
     return {
       isLoading: false,
-      svg: null,
-      g: null,
+      mapSVG: null,
+      mapSVGgroup: null,
       tableSVG: null,
     };
   },
@@ -65,14 +66,13 @@ export default {
     },
   },
   mounted() {
-    this.svg = d3.select(this.$refs.svg);
-    this.g = this.svg.select("g");
+    this.mapSVG = d3.select(this.$refs.map);
+    this.mapSVGgroup = this.mapSVG.select("g");
     this.tableSVG = d3.select(this.$refs.table);
-
-    if (this.g) {
+    if (this.mapSVGgroup) {
       this.drawTables();
     } else {
-      console.log("ERROR");
+      this.$notifyError('Error');
     }
   },
   methods: {
@@ -88,7 +88,7 @@ export default {
       this.$emit("tableClick", person);
     },
     drawTables() {
-      const svgTablesGroup = this.g.append("g").classed("groupPlaces", true);
+      const svgTablesGroup = this.mapSVGgroup.append("g").classed("groupPlaces", true);
 
       this.tables.map((table) => {
         const svgTable = svgTablesGroup

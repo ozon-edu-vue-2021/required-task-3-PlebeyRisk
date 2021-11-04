@@ -10,6 +10,7 @@
 
 <script>
 export default {
+  name: "LegendItem",
   props: {
     color: {
       type: String,

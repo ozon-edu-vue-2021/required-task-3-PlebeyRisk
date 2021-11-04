@@ -6,7 +6,7 @@
         :tables="tables"
         :people="people"
         :legend="legend"
-        @tableClick="(e) => (person = e)"
+        @tableClick="tableClickHandler"
         @tableClickOutside="resetPerson"
       />
       <SideMenu
@@ -63,6 +63,9 @@ export default {
     resetPerson() {
       this.person = null;
     },
+    tableClickHandler(person) {
+      this.person = person;
+    }
   },
 };
 </script>
@@ -92,7 +95,7 @@ h3 {
 
 .office {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: 1fr 450px;
   border-radius: 6px;
   border: 1px solid #ccd8e4;
   height: 100%;
